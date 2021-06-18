@@ -54,9 +54,14 @@ app.delete("/api/persons/:id", (req, res) => {
 
 app.post("/api/persons", (req, res) => {
     const body = req.body;
+    const personName = phonebookEntries.find(
+        (person) => person.name === body.name
+    );
 
     if (!body.name || !body.number) {
         return res.status(400).json({ error: "name or number missing" });
+    } else if (personName !== undefined) {
+        return res.status(400).json({ error: "name already in phonebook" });
     }
 
     const person = {
