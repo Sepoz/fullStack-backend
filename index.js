@@ -61,7 +61,7 @@ app.post("/api/persons", (req, res) => {
     if (!body.name || !body.number) {
         return res.status(400).json({ error: "name or number missing" });
     } else if (personName !== undefined) {
-        return res.status(400).json({ error: "name already in phonebook" });
+        return res.status(400).json({ error: "name must be unique" });
     }
 
     const person = {
