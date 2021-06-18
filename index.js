@@ -1,6 +1,7 @@
-const { PersonSharp } = require("@material-ui/icons");
 const express = require("express");
 const app = express();
+
+app.use(express.json());
 
 let phonebookEntries = [
     {
@@ -25,6 +26,10 @@ let phonebookEntries = [
     },
 ];
 
+function generateID(max) {
+    return Math.floor(Math.random() * max);
+}
+
 app.get("/api/persons", (req, res) => {
     res.json(phonebookEntries);
 });
@@ -45,6 +50,24 @@ app.delete("/api/persons/:id", (req, res) => {
     phonebookEntries = phonebookEntries.filter((person) => person.id !== id);
 
     res.status(204).end();
+});
+
+app.post("/api/persons", (req, res) => {
+    const body = req.body;
+
+    if (!body.name || !body.number) {
+        return res.status(400).json({ error: "name or number missing" });
+    }
+
+    const person = {
+        name: body.name,
+        number: body.number,
+        id: generateID(1000000),
+    };
+
+    phonebookEntries = phonebookEntries.concat(person);
+
+    res.status(200).end();
 });
 
 app.get("/info", (req, res) => {
