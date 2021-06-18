@@ -28,6 +28,12 @@ app.get("/api/persons", (req, res) => {
     res.json(phonebookEntries);
 });
 
+app.get("/info", (req, res) => {
+    const event = new Date();
+    // prettier-ignore
+    res.send(`<h2>Phonebook has info for ${phonebookEntries.length}</h2> <h2>${event.toString()}</h2>`);
+});
+
 const PORT = 3001;
 app.listen(PORT, () => {
     console.log(`server running on port ${PORT}`);
