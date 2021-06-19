@@ -92,7 +92,7 @@ app.get("/info", (req, res) => {
     res.send(`<h2>Phonebook has info for ${phonebookEntries.length}</h2> <h2>${event.toString()}</h2>`);
 });
 
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
     console.log(`server running on port ${PORT}`);
 });
