@@ -1,5 +1,6 @@
 const express = require("express");
 const morgan = require("morgan");
+const cors = require("cors");
 
 const app = express();
 
@@ -9,6 +10,8 @@ app.use(
         ":method :url :status :res[content-length] - :response-time ms - :data"
     )
 );
+app.use(cors());
+
 morgan.token("data", (req, res) => JSON.stringify(req.body));
 
 let phonebookEntries = [
@@ -80,7 +83,7 @@ app.post("/api/persons", (req, res) => {
 
     phonebookEntries = phonebookEntries.concat(person);
 
-    res.status(200).end();
+    res.json(person);
 });
 
 app.get("/info", (req, res) => {
