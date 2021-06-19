@@ -1,3 +1,3 @@
-Heroku backend:
+Heroku:
 
-https://shrouded-peak-27782.herokuapp.com/api/persons
+https://shrouded-peak-27782.herokuapp.com
