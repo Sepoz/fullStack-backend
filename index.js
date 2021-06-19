@@ -11,6 +11,7 @@ app.use(
     )
 );
 app.use(cors());
+app.use(express.static("build"));
 
 morgan.token("data", (req, res) => JSON.stringify(req.body));
 
