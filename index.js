@@ -94,7 +94,7 @@ const errorHandler = (err, req, res, next) => {
         return res.status(400).send({ error: "malformatted id" });
     }
     if (error.name === "ValidationError") {
-        return res.status(400).send({ error: error.message });
+        return res.status(400).send({ error: "unexpected format" });
     }
     next(error);
 };
