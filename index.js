@@ -1,6 +1,9 @@
 const express = require("express");
 const morgan = require("morgan");
 const cors = require("cors");
+require("dotenv").config();
+
+const Person = require("./models/person");
 
 const app = express();
 
@@ -15,35 +18,8 @@ app.use(express.static("build"));
 
 morgan.token("data", (req, res) => JSON.stringify(req.body));
 
-let phonebookEntries = [
-    {
-        name: "Arto Hellas",
-        number: "040-123456",
-        id: 1,
-    },
-    {
-        name: "Ada Lovelace",
-        number: "39-44-5323523",
-        id: 2,
-    },
-    {
-        name: "Dan Abramov",
-        number: "12-43-234345",
-        id: 3,
-    },
-    {
-        name: "Mary Poppendieck",
-        number: "39-23-6423122",
-        id: 4,
-    },
-];
-
-function generateID(max) {
-    return Math.floor(Math.random() * max);
-}
-
 app.get("/api/persons", (req, res) => {
-    res.json(phonebookEntries);
+    Person.find({}).then((persons) => res.json(persons));
 });
 
 app.get("/api/persons/:id", (req, res) => {
@@ -66,25 +42,26 @@ app.delete("/api/persons/:id", (req, res) => {
 
 app.post("/api/persons", (req, res) => {
     const body = req.body;
-    const personName = phonebookEntries.find(
-        (person) => person.name === body.name
-    );
 
     if (!body.name || !body.number) {
         return res.status(400).json({ error: "name or number missing" });
-    } else if (personName !== undefined) {
-        return res.status(400).json({ error: "name must be unique" });
     }
 
-    const person = {
-        name: body.name,
-        number: body.number,
-        id: generateID(1000000),
-    };
+    Person.find({ name: body.name }).then((person) => {
+        console.log(person);
+        if (person.length !== 0) {
+            return res.status(400).json({ error: "name must be unique" });
+        } else {
+            const person = new Person({
+                name: body.name,
+                number: body.number,
+            });
 
-    phonebookEntries = phonebookEntries.concat(person);
-
-    res.json(person);
+            person.save().then((savedPerson) => {
+                res.json(savedPerson);
+            });
+        }
+    });
 });
 
 app.get("/info", (req, res) => {
