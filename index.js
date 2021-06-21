@@ -22,15 +22,16 @@ app.get("/api/persons", (req, res) => {
     Person.find({}).then((persons) => res.json(persons));
 });
 
-app.get("/api/persons/:id", (req, res) => {
-    const id = Number(req.params.id);
-    const person = phonebookEntries.find((person) => person.id === id);
-
-    if (person) {
-        res.json(person);
-    } else {
-        res.status(404).end();
-    }
+app.get("/api/persons/:id", (req, res, next) => {
+    Person.findById(req.params.id)
+        .then((person) => {
+            if (person) {
+                res.json(person);
+            } else {
+                res.status(404).end();
+            }
+        })
+        .catch((error) => next(error));
 });
 
 app.delete("/api/persons/:id", (req, res, next) => {
@@ -66,8 +67,16 @@ app.post("/api/persons", (req, res) => {
 
 app.get("/info", (req, res) => {
     const event = new Date();
-    // prettier-ignore
-    res.send(`<h2>Phonebook has info for ${phonebookEntries.length}</h2> <h2>${event.toString()}</h2>`);
+
+    Person.find({})
+        .then((result) => {
+            console.log(result.length);
+            const phonebookEntries = result.length;
+            res.send(
+                `<h2>Phonebook has info for ${phonebookEntries}</h2> <h2>${event.toString()}</h2>`
+            );
+        })
+        .catch((error) => console.log(error));
 });
 
 const PORT = process.env.PORT || 3001;
