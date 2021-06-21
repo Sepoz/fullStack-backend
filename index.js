@@ -33,11 +33,12 @@ app.get("/api/persons/:id", (req, res) => {
     }
 });
 
-app.delete("/api/persons/:id", (req, res) => {
-    const id = Number(req.params.id);
-    phonebookEntries = phonebookEntries.filter((person) => person.id !== id);
-
-    res.status(204).end();
+app.delete("/api/persons/:id", (req, res, next) => {
+    Person.findByIdAndRemove(req.params.id)
+        .then((result) => {
+            res.status(204).end();
+        })
+        .catch((error) => next(error));
 });
 
 app.post("/api/persons", (req, res) => {
@@ -48,7 +49,6 @@ app.post("/api/persons", (req, res) => {
     }
 
     Person.find({ name: body.name }).then((person) => {
-        console.log(person);
         if (person.length !== 0) {
             return res.status(400).json({ error: "name must be unique" });
         } else {
