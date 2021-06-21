@@ -44,6 +44,21 @@ app.delete("/api/persons/:id", (req, res, next) => {
         .catch((error) => next(error));
 });
 
+app.put("/api/persons/:id", (req, res, next) => {
+    const body = req.body;
+
+    const person = {
+        name: body.name,
+        number: body.number,
+    };
+
+    Person.findByIdAndUpdate(req.params.id, person, { new: true })
+        .then((updatedPerson) => {
+            res.json(updatedPerson);
+        })
+        .catch((error) => next(error));
+});
+
 app.post("/api/persons", (req, res, next) => {
     const body = req.body;
 
@@ -74,10 +89,10 @@ app.get("/info", (req, res, next) => {
 
     Person.find({})
         .then((result) => {
-            console.log(result.length);
-            const phonebookEntries = result.length;
             res.send(
-                `<h2>Phonebook has info for ${phonebookEntries}</h2> <h2>${event.toString()}</h2>`
+                `<h2>Phonebook has info for ${
+                    result.length
+                }</h2> <h2>${event.toString()}</h2>`
             );
         })
         .catch((error) => next(error));
