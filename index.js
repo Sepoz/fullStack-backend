@@ -7,6 +7,7 @@ const Person = require("./models/person");
 
 const app = express();
 
+app.use(express.static("build"));
 app.use(express.json());
 app.use(
     morgan(
@@ -14,12 +15,13 @@ app.use(
     )
 );
 app.use(cors());
-app.use(express.static("build"));
 
 morgan.token("data", (req, res) => JSON.stringify(req.body));
 
-app.get("/api/persons", (req, res) => {
-    Person.find({}).then((persons) => res.json(persons));
+app.get("/api/persons", (req, res, next) => {
+    Person.find({})
+        .then((persons) => res.json(persons))
+        .catch((error) => next(error));
 });
 
 app.get("/api/persons/:id", (req, res, next) => {
@@ -42,30 +44,32 @@ app.delete("/api/persons/:id", (req, res, next) => {
         .catch((error) => next(error));
 });
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
     const body = req.body;
 
     if (!body.name || !body.number) {
         return res.status(400).json({ error: "name or number missing" });
     }
 
-    Person.find({ name: body.name }).then((person) => {
-        if (person.length !== 0) {
-            return res.status(400).json({ error: "name must be unique" });
-        } else {
-            const person = new Person({
-                name: body.name,
-                number: body.number,
-            });
+    Person.find({ name: body.name })
+        .then((person) => {
+            if (person.length !== 0) {
+                return res.status(400).json({ error: "name must be unique" });
+            } else {
+                const person = new Person({
+                    name: body.name,
+                    number: body.number,
+                });
 
-            person.save().then((savedPerson) => {
-                res.json(savedPerson);
-            });
-        }
-    });
+                person.save().then((savedPerson) => {
+                    res.json(savedPerson);
+                });
+            }
+        })
+        .catch((error) => next(error));
 });
 
-app.get("/info", (req, res) => {
+app.get("/info", (req, res, next) => {
     const event = new Date();
 
     Person.find({})
@@ -76,8 +80,26 @@ app.get("/info", (req, res) => {
                 `<h2>Phonebook has info for ${phonebookEntries}</h2> <h2>${event.toString()}</h2>`
             );
         })
-        .catch((error) => console.log(error));
+        .catch((error) => next(error));
 });
+
+const unknownEndpoint = (req, res) => {
+    res.status(404).send({ error: "unknown endpoint" });
+};
+app.use(unknownEndpoint);
+
+const errorHandler = (err, req, res, next) => {
+    console.log(err);
+    if ((err.name = "CastError")) {
+        return res.status(400).send({ error: "malformatted id" });
+    }
+    if (error.name === "ValidationError") {
+        return res.status(400).send({ error: error.message });
+    }
+    next(error);
+};
+
+app.use(errorHandler);
 
 const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
