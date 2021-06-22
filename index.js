@@ -62,24 +62,15 @@ app.put("/api/persons/:id", (req, res, next) => {
 app.post("/api/persons", (req, res, next) => {
     const body = req.body;
 
-    if (!body.name || !body.number) {
-        return res.status(400).json({ error: "name or number missing" });
-    }
+    const person = new Person({
+        name: body.name,
+        number: body.number,
+    });
 
-    Person.find({ name: body.name })
-        .then((person) => {
-            if (person.length !== 0) {
-                return res.status(400).json({ error: "name must be unique" });
-            } else {
-                const person = new Person({
-                    name: body.name,
-                    number: body.number,
-                });
-
-                person.save().then((savedPerson) => {
-                    res.json(savedPerson);
-                });
-            }
+    person
+        .save()
+        .then((savedPerson) => {
+            res.json(savedPerson);
         })
         .catch((error) => next(error));
 });
@@ -104,14 +95,13 @@ const unknownEndpoint = (req, res) => {
 app.use(unknownEndpoint);
 
 const errorHandler = (err, req, res, next) => {
-    console.log(err);
-    if ((err.name = "CastError")) {
+    console.log(err.message);
+    if (err.name === "CastError") {
         return res.status(400).send({ error: "malformatted id" });
+    } else if (err.name === "ValidationError") {
+        return res.status(400).send({ error: err.message });
     }
-    if (error.name === "ValidationError") {
-        return res.status(400).send({ error: "unexpected format" });
-    }
-    next(error);
+    next(err);
 };
 
 app.use(errorHandler);
